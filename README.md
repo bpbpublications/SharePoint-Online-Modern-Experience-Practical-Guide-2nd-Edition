@@ -1,2 +1,2 @@
-# SharePoint Online Modern Experience Practical Guide
- SharePoint Online Modern Experience Practical Guide, by BPB Publications
+# SharePoint Online Modern Experience Practical Guide - 2nd Edition
+ SharePoint Online Modern Experience Practical Guide - 2nd Edition, by BPB Publications
