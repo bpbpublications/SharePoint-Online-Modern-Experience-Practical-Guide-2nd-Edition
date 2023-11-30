@@ -1,0 +1,15 @@
+1. Use API to create SharePoint list via Power Automate -
+
+Body: 
+{ '__metadata': {'type': 'SP.List' , 
+'AllowContentTypes': true, 
+'BaseTemplate': 100, 
+‘ContentTypesEnabled’: true, 
+'Description': 'My list description', 
+'Title': 'Budget Management'}
+
+
+2. Trigger flow based on condition via Power Automate -
+
+@equals(triggerBody()?['TaskStatus']?['Value'], 'Completed')
+

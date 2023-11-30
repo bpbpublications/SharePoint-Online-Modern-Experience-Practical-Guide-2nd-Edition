@@ -1,0 +1,60 @@
+1. Adding calculated columns to the SharePoint Online modern list -
+
+= [Due Date] - [Start Date] 
+
+
+2. Example 1: Formatting choice column in the SharePoint list -
+
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/sp/v2/column-formatting.schema.json",
+  "elmType": "div",
+  "attributes": {
+    "class": "=if(@currentField == 'Delivered', 'sp-field-severity--good', if(@currentField == 'Under Developing', 'sp-field-severity--low', if(@currentField == 'Under Testing', 'sp-field-severity--warning', if(@currentField == 'Not Started', 'sp-field-severity--severeWarning', 'sp-field-severity--blocked')))) + ' ms-fontColor-neutralSecondary'"
+  },
+  "children": [
+    {
+      "elmType": "span",
+      "style": {
+        "display": "inline-block",
+        "padding": "0 4px"
+      },
+      "attributes": {
+        "iconName": "=if(@currentField == 'Delivered', 'CheckMark', if(@currentField == 'Under Developing', 'Forward', if(@currentField == 'Under Testing', 'Warning', if(@currentField == 'Not Started', 'ErrorBadge', 'Warning'))))"
+      }
+    },
+    {
+      "elmType": "span",
+      "txtContent": "@currentField"
+    }
+  ]
+}
+
+
+3. Example 2: Formatting date column in the SharePoint list -
+
+{
+   "$schema": "https://developer.microsoft.com/json-schemas/sp/v2/column-formatting.schema.json",
+   "elmType": "div",
+   "txtContent": "@currentField",
+   "style": {
+      "color": {
+         "operator": "?",
+         "operands": [
+            {
+               "operator": "<=",
+               "operands": [
+                  "[$DueDate]",
+                  {
+                     "operator": "Date()",
+                     "operands": [
+                        "2/05/2023"
+                     ]
+                  }
+               ]
+            },
+            "#0000ff",
+            ""
+         ]
+      }
+   }
+}

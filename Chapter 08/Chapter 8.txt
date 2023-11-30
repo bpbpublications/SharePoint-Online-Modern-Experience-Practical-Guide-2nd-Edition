@@ -1,0 +1,89 @@
+1. Customize the SharePoint list form in Power Apps using conditional formatting -
+
+Fill = Switch(DataCardValue3.Selected.Value,"Planned",Color.DarkBlue, "Assigned", Color.LightBlue, "Ready to publish", Color.DarkSeaGreen,"Published",Color.IndianRed,Color.DarkGreen) 
+
+
+2. Welcome Screen -
+
+OnSelect = Navigate('Main Screen')
+
+
+3. Refresh -
+
+OnSelect = ResetForm(Form1); 
+
+
+4. Submit -
+
+OnSelect = SubmitForm(Form1); 
+
+
+5. Success Screen -
+
+OnSelect = Navigate('Welcome Screen') 
+
+
+6. Case 2: 
+
+OnSelect = Navigate('Details Screen') 
+
+
+7. Details Screen -
+
+Next Navigation icon -
+
+OnSelect = Navigate( 
+    'Details Screen', 
+    ScreenTransition.Fade, 
+    {selectedId: Gallery1.Selected.ID} 
+) 
+
+
+Next Navigation icon color change -
+
+Color = If( 
+    ThisItem.IsSelected, 
+    Color.Blue, 
+    Color.Coral 
+) 
+
+
+8. Connect and use SharePoint with Power Apps Gallery Control -
+
+Items = SortByColumns( 
+    Filter( 
+        'TSInfo Attachments', 
+        txtSearchAttach.Text in Title 
+    ), 
+    "AttachmentCreatedDate", 
+    SortOrder.Descending 
+) 
+
+
+Text = “Attachment Name: “  & ThisItem.Title 
+
+Text = "Created Date: " & ThisItem.'Attachment Created Date' 
+
+
+9. PowerApps button update SharePoint List item (for single line of text data type column) -
+
+OnSelect = Patch( 
+    'Car Rental Services', 
+    ThisItem, 
+    {'Car Color': "Grey"} 
+) 
+
+
+10. Power Apps button update SharePoint List item (for choice data type column) -
+
+OnSelect = Patch( 
+    'Car Rental Services', 
+    ThisItem, 
+    { 
+        Location: { 
+            Value: "BANGALORE", 
+           '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedReference" 
+        } 
+    } 
+) 
+

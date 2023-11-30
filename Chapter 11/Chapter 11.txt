@@ -1,0 +1,1724 @@
+Topic-Setting up SPFx development environment  
+
+1. Installing Node.js 
+ node –version 
+
+2. Installing SPFx development toolchain
+
+npm install gulp-cli yo @microsoft/generator-sharepoint –global  
+
+3. Installing Gulp:  
+npm install gulp-cli –global  
+
+4. Installing Yeoman
+npm install yo --global  
+
+5. Installing yeoman SharePoint generator
+npm install @microsoft/generator-sharepoint –global   
+
+6. check whether the package is installed globally or not in your local environment:
+npm list --global --depth=0
+
+==============================================================
+Topic-Creating your first client side SPFx webpart
+
+7. To change the drive, run the below command:
+cd /d H:\
+
+8. Navigate to the project folder by using the following command:
+mkdir  "spfx projects"  
+cd  "spfx projects"
+
+9. Create the new project
+yo @microsoft/sharepoint
+
+10. Configure Self signed developer certificate  
+gulp trust-dev-cert 
+
+===============================================================
+
+Topic-Test Client-side web part in SPFx local web server 
+
+11. server. json file :
+
+{ 
+
+"$schema":"https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json", 
+
+"port": 4321, 
+
+"https": true, 
+
+"initialPage":"https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/_layouts/workbench.aspx" 
+}
+---------------------------
+12. To run the project:
+
+gulp serve  
+
+=================================================================
+Topic-Deploy SharePoint Framework client web part to SharePoint Online App Catalog
+
+13. package-solution. Json file contains the below code:
+
+ 
+
+"$schema":"https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json", 
+
+"solution": { 
+
+"name": "web-part-client-side-solution", 
+
+"id": "143604d4-662e-467a-9c4c-37e5830d9675",  
+
+"version": "1.0.0.0", 
+
+"includeClientSideAssets": true, 
+
+"skipFeatureDeployment": true, 
+
+"isDomainIsolated": false, 
+
+"developer": { 
+
+"name":"", 
+
+"websiteUrl":"", 
+
+"privacyUrl":"", 
+
+"termsOfUseUrl": 
+
+"mpnId": "Undefined-1.16.1" 
+
+}, 
+
+"metadata": { 
+
+"shortDescription": { 
+
+"default": "WebPart description" 
+
+}, 
+
+"longDescription": { 
+
+"default": "WebPart description" 
+
+}, 
+
+"screenshotPaths": [], 
+
+"videoUrl":"", 
+
+"categories": [] 
+
+}, 
+
+"features":[ 
+
+{ 
+
+"title": "web-part Feature", 
+
+"description": "The feature that activates elements of the web-part solution.", 
+
+"id": "eafe6b11-2d6e-4cce-a5f7-e07e35c666dc", 
+
+"version": "1.0.0.0" 
+
+} 
+
+] 
+
+}, 
+
+"paths": { 
+
+"zippedPackage": "solution/web-part.sppkg" 
+
+} 
+
+} 
+
+----------------------------------
+14. To bundle the solution, write the command below in the command prompt:
+gulp bundle  
+
+--------------------------------
+15. To package the solution, write the command below in the command prompt.  
+
+gulp package-solution
+
+=============================================================
+Topic -Handling field changes in SPFx 
+
+16. If you want to enable the non-reactive mode, you need to the below code to yourfor the spfx solution:  
+
+protected get disableReactivePropertyChanges(): boolean {  
+
+  return true;  
+
+}  
+--------------------------
+Sub topic-Creating Property pane in SPFx   
+
+17. create a new folder
+mkdir "client-webpart"  
+
+18. Navigate to the directory and, write the below command:  
+
+cd “client-webpart”
+
+19. Run the SharePoint Yeoman generator to create a new project, in the project file:.  
+
+yo @microsoft/sharepoint
+
+20. Run the project with the below command and make sure you have provided the site URL to the workbench.  
+
+ gulp serve 
+
+21. EventListWebpart.ts file:
+export interface IEventListWebPartProps {  
+  eventName: string;  
+  eventDate:string;  
+  description: string;  
+} 
+
+22. Add the below code to ‘getPropertyPaneConfiguration():
+
+protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {  
+
+    return {  
+
+      pages: [  
+
+        {  
+
+          header: {  
+
+            description: strings.PropertyPaneDescription  
+
+          },  
+
+          groups: [  
+
+            {  
+
+              groupName: strings.BasicGroupName,  
+
+              groupFields: [  
+
+                PropertyPaneTextField('eventName', {  
+
+                  label: strings.EventNameFieldLabel  
+
+                }),  
+
+                PropertyPaneTextField('eventDate', {  
+
+                  label: strings.EventDateFieldLabel  
+
+                }),  
+
+                PropertyPaneTextField('description', {  
+
+                  label: strings.DescriptionFieldLabel  
+
+                })  
+
+              ]  
+
+            }  
+
+          ]  
+
+        }  
+
+      ]  
+
+    };  
+
+  }  
+
+23. change the render() code, with below code:  
+
+public render(): void {  
+
+    this.domElement.innerHTML = `  
+
+    <section class="${styles.eventList} ${!!this.context.sdks.microsoftTeams ? styles.teams : ''}">  
+
+      <div class="${styles.welcome}">  
+
+        <img alt="" src="${this._isDarkTheme ? require('./assets/welcome-dark.png') : require('./assets/welcome-light.png')}" class="${styles.welcomeImage}" />  
+
+        <h2>Well done, ${escape(this.context.pageContext.user.displayName)}!</h2>  
+
+        <div>${this._environmentMessage}</div>  
+
+        <div>Event Name: <strong>${escape(this.properties.eventName)}</strong></div>  
+
+        <div>Event Date: <strong>${escape(this.properties.eventDate)}</strong></div>  
+
+        <div>Event Description: <strong>${escape(this.properties.description)}</strong></div>  
+
+      </div>  
+
+    </section>`;  
+
+  }  
+
+24. Navigate to manifest.json file,then preconfiguredEntries part, write the below code:  
+
+"preconfiguredEntries": [{  
+
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",   
+
+    "group": { "default": "Advanced" },  
+
+    "title": { "default": "EventList" },  
+
+    "description": { "default": "EventList description" },  
+
+    "officeFabricIconFontName": "Page",  
+
+    "properties": {  
+
+      "eventName": "",  
+
+      "eventDate":"",  
+
+      "description": ""  
+
+    }  
+
+  }]  
+
+25. Navigate to en-un.js file,then write the below code:  
+
+define([], function() {  
+
+  return {  
+
+    "PropertyPaneDescription": "Description",  
+
+    "PropertyPaneEventName":"Event Name",  
+
+    "PropertyPaneEventDate":"Event Date",  
+
+    "BasicGroupName": "Group Name",  
+
+    "EventNameFieldLabel":"Event Name",  
+
+    "EventDateFieldLabel": "Event Date",  
+
+    "DescriptionFieldLabel": "Description",  
+
+    "AppLocalEnvironmentSharePoint": "The app is running on your local environment as SharePoint web part",  
+
+    "AppLocalEnvironmentTeams": "The app is running on your local environment as Microsoft Teams app",  
+
+    "AppLocalEnvironmentOffice": "The app is running on your local environment in office.com",  
+
+    "AppLocalEnvironmentOutlook": "The app is running on your local environment in Outlook",  
+
+    "AppSharePointEnvironment": "The app is running on SharePoint page",  
+
+    "AppTeamsTabEnvironment": "The app is running in Microsoft Teams",  
+
+    "AppOfficeEnvironment": "The app is running in office.com",  
+
+    "AppOutlookEnvironment": "The app is running in Outlook"  
+
+  }  
+
+});  
+
+26. Navigate to myStrings.d.ts file,write the below code:  
+
+declare interface IEventListWebPartStrings {  
+
+  PropertyPaneDescription: string;  
+
+  BasicGroupName: string;  
+
+  DescriptionFieldLabel: string;  
+
+  EventNameFieldLabel:string;  
+
+  EventDateFieldLabel:string;  
+
+  AppLocalEnvironmentSharePoint: string;  
+
+  AppLocalEnvironmentTeams: string;  
+
+  AppLocalEnvironmentOffice: string;  
+
+  AppLocalEnvironmentOutlook: string;  
+
+  AppSharePointEnvironment: string;  
+
+  AppTeamsTabEnvironment: string;  
+
+  AppOfficeEnvironment: string;  
+
+  AppOutlookEnvironment: string;  
+
+}  
+
+declare module 'EventListWebPartStrings' {  
+
+  const strings: IEventListWebPartStrings;  
+
+  export = strings;  
+
+}  
+
+==============================================================
+Introduction to SharePoint Framework Extensions  
+
+1. Application customizers 
+
+Topic- Creatinge Application customizer extensions in SPFx
+
+27. Command to create project folder:
+mkdir AppCustomizer  
+
+28. Navigate to directory using the below command:  
+cd AppCustomizer  
+
+29. SharePoint generator will create the project with required dependencies, run the below command:
+yo @microsoft/sharepoint
+
+30. open serve.json file code:
+
+{ 
+
+"$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json", 
+
+"port": 4321, 
+
+"https": true, 
+
+"serveConfigurations": { 
+
+"default": { 
+
+"pageurl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/SitePages/ProjectHome.aspx",  
+
+customActions": { 
+
+"d9a50d0d-56d4-4506-95ab-9fdd7ef17544": { 
+
+"location": "ClientSideExtension.ApplicationCustomizer",  
+
+"properties":{ 
+
+"testMessage": "Test message" 
+
+} 
+
+} 
+
+} 
+
+}, 
+
+"appCustomizerDescription": 
+
+"pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/SitePages/ProjectHome.aspx" , 
+
+customactions : { 
+
+"d9a50d0d-56d4-4506-95ab-9fdd7ef17544": { 
+
+"location": "ClientSideExtension.ApplicationCustomizer",  
+
+"properties": { 
+
+"testMessage": "Test message" 
+
+} 
+
+} 
+
+} 
+
+} 
+
+} 
+
+}   
+
+31. Manifest.json file code:
+
+{ 
+
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json", 
+
+ 
+
+  "id": "d9a50d0d-56d4-4506-95ab-9fdd7ef17544", 
+
+  "alias": "AppCustomizerDescriptionApplicationCusto", 
+
+  "componentType": "Extension", 
+
+  "extensionType": "ApplicationCustomizer", 
+
+ 
+
+  // The "*" signifies that the version should be taken from the package.json 
+
+  "version": "*", 
+
+  "manifestVersion": 2, 
+
+ 
+
+  // If true, the component can only be installed on sites where Custom Script is allowed. 
+
+  // Components that allow authors to embed arbitrary script code should set this to true. 
+
+  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f 
+
+  "requiresCustomScript": false 
+
+} 
+
+32. AppCustomizerDescriptionApplicationCustomizer.ts file code:
+
+public onInit(): Promise<void> { 
+
+    Log.info(LOG_SOURCE, `Initialized ${strings.Title}`); 
+    let message: string = this.properties.testMessage; 
+    if (!message) { 
+
+      message = '(No properties were provided.)'; 
+    } 
+    Dialog.alert(`Hello from ${strings.Title}:\n\n${message}`).catch(() => { 
+
+      /* handle error */ 
+
+    }); 
+    return Promise.resolve(); 
+  } 
+
+33. Run the following command to compile your code
+gulp serve  
+===========================================================
+2. Field customizer
+
+34. create project folder:  
+
+mkdir FieldCustomizer  
+
+ 
+
+35. Navigate to directory using the below command:  
+
+ cd FieldCustomizer  
+
+36. Create the project with required dependencies by running the below command.  
+
+yo @microsoft/sharepoint
+
+37. manifest.json file code:
+{ 
+
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json", 
+
+  "id": "b31d6f39-b010-425d-83bc-a6e48dc77aab", 
+
+  "alias": "FieldCustomFieldCustomizer", 
+
+  "componentType": "Extension", 
+
+  "extensionType": "FieldCustomizer", 
+
+  // The "*" signifies that the version should be taken from the package.json 
+  "version": "*", 
+  "manifestVersion": 2, 
+
+  // If true, the component can only be installed on sites where Custom Script is allowed. 
+
+  // Components that allow authors to embed arbitrary script code should set this to true. 
+
+  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f 
+
+  "requiresCustomScript": false 
+
+} 
+
+38. FieldCustomFieldCustomizer.ts file code:
+
+import { Log } from '@microsoft/sp-core-library'; 
+
+import { 
+
+  BaseFieldCustomizer, 
+
+  IFieldCustomizerCellEventParameters 
+
+} from '@microsoft/sp-listview-extensibility'; 
+
+ 
+
+import * as strings from 'FieldCustomFieldCustomizerStrings'; 
+
+import styles from './FieldCustomFieldCustomizer.module.scss'; 
+
+
+39. In the same FieldCustomFieldCustomizer.ts file you can see the methods onInt(), onRenderCell(), and onDisposeCell(). 
+
+export default class FieldCustomFieldCustomizer 
+
+extends BaseFieldCustomizer<IFieldCustomFieldCustomizerProperties> { 
+
+public onInit(): Promise<void> { 
+
+} 
+
+// Add your custom initialization to this method. The framework will wait 
+
+// for the returned promise to resolve before firing any BaseFieldCustomizer events. 
+
+Log.info(LOG_SOURCE, 'Activated FieldCustomFieldCustomizer with properties:"); 
+
+Log.info(LOG_SOURCE, JSON.stringify(this.properties, undefined, 2)); 
+
+Log.info(LOG_SOURCE, The following string should be equal: "FieldCustomFieldCustomizer" and "${strings.Title}**) 
+
+return Promise.resolve(); 
+
+public onRenderCell(event: IFieldCustomizerCellEventParameters): void { 
+
+} 
+
+// Use this method to perform your custom cell rendering. 
+
+const text: string = "${this.properties.sampleText}: ${event.fieldValue}"; 
+
+event.domElement.innerText = text; 
+
+event.domElement.classList.add(styles.fieldCustom); 
+
+public onDisposeCell(event: IFieldCustomizerCellEventParameters): void { 
+
+// This method should be used to free any resources that were allocated during rendering. 
+
+// For example, if your onRenderCell() called ReactDOM.render(), then you should 
+
+// call ReactDOM.unmountComponentAtNode() here. 
+
+super.onDisposeCell(event); 
+
+} 
+
+} 
+
+40. serve.json file code:
+
+{ 
+
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json", 
+
+  "port": 4321, 
+
+  "https": true, 
+
+  "serveConfigurations": { 
+
+    "default": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/Lists/Task%20list/AllItems.aspx", 
+
+      "fieldCustomizers": { 
+
+        "Progress": { 
+
+          "id": "158d32590-eabc-4070-aa7b-8678f5d0ad40", 
+
+          "properties": { 
+
+            "sampleText": "Value" 
+
+          } 
+
+        } 
+
+      } 
+
+    }, 
+
+    "fieldCustomizer": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/Lists/Task%20list/AllItems.aspx", 
+
+      "fieldCustomizers": { 
+
+        "Progress": { 
+
+          "id": "58d32590-eabc-4070-aa7b-8678f5d0ad40", 
+
+          "properties": { 
+
+            "sampleText": "Value" 
+
+          } 
+
+        } 
+
+      } 
+
+    } 
+
+  } 
+
+}  
+ 
+41. In this FieldCustomFieldCustomizer.ts file, change the onRenderCell(), with the below following code:.  
+
+ 
+
+public onRenderCell(event: IFieldCustomizerCellEventParameters): void {  
+
+    // Use this method to perform your custom cell rendering.  
+
+   if (this.context.field.internalName === 'Progress') {  
+
+      let value: number = parseInt(event.fieldValue);  
+
+      if(value<45)        
+
+      {  
+
+        event.domElement.innerHTML =`<div class='${styles.red}'>  
+
+        ${event.fieldValue}</div> `;  
+
+      }  
+
+      else if(value>45 && value<85)   
+
+      {  
+
+        event.domElement.innerHTML =`<div class='${styles.yellow}'>  
+
+        ${event.fieldValue}</div> `;  
+
+      }  
+
+      else  
+
+      {  
+
+        event.domElement.innerHTML =`<div class='${styles.green}'>  
+
+        ${event.fieldValue}</div> `;  
+
+      }         
+
+    }  
+
+  }  
+
+42. Then navigate to .scss file and add the below cssCSS code for .red, .yellow and .green cssCSS class. This file is in: 
+
+ the “\FieldCustomizer\src\extensions\fieldCustom\FieldCustomFieldCustomizer.module.scss”.  
+
+.green {  
+
+  background-color:green;  
+
+  width: 100px;  
+
+  height: 25px;  
+
+  color: white;  
+
+}  
+
+.red {  
+
+  background-color:red;  
+
+  width: 100px;  
+
+  height: 25px;  
+
+  color: white;  
+
+}  
+
+.yellow {  
+
+  background-color:yellow;  
+
+  width: 100px;  
+
+  height: 25px;  
+
+}  
+
+43. Run the below command to compile the code and you can see the solution will run in the local server.  
+
+gulp serve
+
+==========================================
+
+Deploying the Field customizer solution in SharePoint 
+
+44. elements.xml file code:
+
+<?xml version="1.0" encoding="utf-8"?> 
+
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/"> 
+
+    <Field ID="{c1ac8f4a-83e1-4e1a-bb12-313e8d7d8e9d}" 
+
+            Name="SPFxPercentage" 
+
+            DisplayName="Percentage" 
+
+            Type="Number" 
+
+            Min="0" 
+
+            Required="FALSE" 
+
+            Group="SPFx Columns" 
+
+            ClientSideComponentId="58d32590-eabc-4070-aa7b-8678f5d0ad40"> 
+
+    </Field> 
+
+</Elements> 
+
+45. package-solution.json file at ./config code:
+
+{ 
+
+"$schema":"https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json", 
+
+ "solution": { 
+
+"name": "field-customizer-client-side-solution", 
+
+"id": "44f73479-f2fd-4d3c-bd7d-25362d17913c",  
+
+"version": "1.0.0.0", 
+
+"includeClientSideAssets": true, 
+
+"skipFeatureDeployment": true, 
+
+"isDomainIsolated": false, 
+
+"developer": { 
+
+"name":"", 
+
+"websiteUrl":"" , 
+
+"privacyUrl":"", 
+
+"termsOfUseUrl":"", 
+
+"mpnId": "Undefined-1.16.1" 
+
+}, 
+
+"metadata":{ 
+
+"shortDescription": { 
+
+"default": "field-customizer description" 
+
+}, 
+
+"longDescription": { 
+
+"default": "field-customizer description" 
+
+}, 
+
+"screenshotPaths": [], 
+
+"videoUrl": "", 
+
+"categories": [] 
+
+}, 
+
+"features":[ 
+
+"title": "Application Extension - Deployment of custom action", 
+
+"description": "Deploys a custom action with ClientSideComponentId association", 
+
+"id": "5542bdd0-c58c-404f-a9cb-232c781086cf", 
+
+"version": "1.0.0.0", 
+
+"assets": { 
+
+"elementManifests": [ 
+
+"elements.xml" 
+
+] 
+
+} 
+
+} 
+
+] 
+
+}, 
+
+"paths": { 
+
+"zippedPackage": "solution/field-customizer.sppkg" 
+
+} 
+
+} 
+
+46. to package the client solution, that contains command set extensions.  
+
+gulp bundle –ship  
+
+ 
+
+47. To creatacreate the solution package solution, run the below command.  
+
+gulp package-solution –ship 
+
+ ==========================================================
+
+3. Command sets  
+
+Creating Command sets extension
+
+48. write the below command to create project folder:  
+
+mkdir CmdSetCustomizer  
+
+ 
+
+49. Navigate to directory using the below command:  
+
+ Cd CmdSetCustomizer
+
+50. To create the project, run the below command :
+
+  yo @microsoft/sharepoint
+
+51. CmdSetCommandSet.manifest.json file code:
+
+{ 
+
+"$schema": "https://developer.microsoft.com/json-schemas/spfx/command-set-extension-manifest.schema.json", 
+
+"id": "1aec144a-29db-41ef-9681-29172fde134f", 
+
+"alias": "CmdSetCommandSet", 
+
+"componentType": "Extension", 
+
+"extensionType": "ListViewCommandset", 
+
+// The "*" signifies that the version should be taken from the package.json  
+
+"version": "*", 
+
+"manifestversion": 2, 
+
+// If true, the component can only be installed on sites where Custom Script is allowed. // Components that allow authors to embed arbitrary script code should set this to true. 
+
+// https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f 
+
+"requiresCustomScript": false, 
+
+"items" : { 
+
+} 
+
+"COMMAND_1": { 
+
+}, 
+
+"title": { "default": "Command One" }, 
+
+"iconImageUrl": "icons/request.png", "type": "command" 
+
+"COMMAND_2": { 
+
+"title": { "default": "Command Two" },  
+
+"iconImageUrl": "icons/cancel.png",  
+
+"type": "command" 
+
+} 
+
+} 
+
+}  
+
+Topic-Understand the code of List View Command set extension:
+
+52. CmdSetCommandSet.ts file code:
+
+import { Log } from '@microsoft/sp-core-library'; 
+
+import { 
+
+  BaseListViewCommandSet, 
+
+  Command, 
+
+  IListViewCommandSetExecuteEventParameters, 
+
+  ListViewStateChangedEventArgs 
+
+} from '@microsoft/sp-listview-extensibility'; 
+
+import { Dialog } from '@microsoft/sp-dialog'; 
+
+ onExecute() code:
+
+public onExecute(event: IListViewCommandSetExecuteEventParameters): void { 
+
+    switch (event.itemId) { 
+
+      case 'COMMAND_1': 
+
+        Dialog.alert(`${this.properties.sampleTextOne}`).catch(() => { 
+
+          /* handle error */ 
+
+        }); 
+
+        break; 
+
+      case 'COMMAND_2': 
+
+        Dialog.alert(`${this.properties.sampleTextTwo}`).catch(() => { 
+
+          /* handle error */ 
+
+        }); 
+
+        break; 
+
+      default: 
+
+        throw new Error('Unknown command'); 
+
+    } 
+
+  } 
+53. serve.json file contains the below code:
+
+{ 
+
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json", 
+
+  "port": 4321, 
+
+  "https": true, 
+
+  "serveConfigurations": { 
+
+    "default": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/Lists/Task%20list/AllItems.aspx", 
+
+      "customActions": { 
+
+        "1aec144a-29db-41ef-9681-29172fde134f": { 
+
+          "location": "ClientSideExtension.ListViewCommandSet.CommandBar", 
+
+          "properties": { 
+
+            "sampleTextOne": "One item is selected in the list", 
+
+            "sampleTextTwo": "This command is always visible." 
+
+          } 
+
+        } 
+
+      } 
+
+    }, 
+
+    "cmdSet": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/Lists/Task%20list/AllItems.aspx", 
+
+      "customActions": { 
+
+        "1aec144a-29db-41ef-9681-29172fde134f": { 
+
+          "location": "ClientSideExtension.ListViewCommandSet.CommandBar", 
+
+          "properties": { 
+
+            "sampleTextOne": "One item is selected in the list", 
+
+            "sampleTextTwo": "This command is always visible." 
+
+          } 
+
+        } 
+
+      } 
+
+    } 
+
+  } 
+
+} 
+
+54. Run the  below command:
+gulp serve
+
+========================================================
+Topic-Deploying the solution in SharePoint
+ 
+
+55. CmdSetCommandSet.manifest.json file code:
+<?xml version="1.0" encoding="utf-8"?> 
+
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/"> 
+
+    <CustomAction 
+
+        Title="CmdSet" 
+
+        RegistrationId="100" 
+
+        RegistrationType="List" 
+
+        Location="ClientSideExtension.ListViewCommandSet.CommandBar" 
+
+        ClientSideComponentId="1aec144a-29db-41ef-9681-29172fde134f" 
+
+        ClientSideComponentProperties="{&quot;sampleTextOne&quot;:&quot;One item is selected in the list.&quot;, &quot;sampleTextTwo&quot;:&quot;This command is always visible.&quot;}"> 
+
+    </CustomAction> 
+
+</Elements> 
+
+56. package-solution.json file code:
+
+{ 
+
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json", 
+
+  "solution": { 
+
+    "name": "cmd-set-customizer-client-side-solution", 
+
+    "id": "c290edde-45a7-4946-90ce-d1a1623a389f", 
+
+    "version": "1.0.0.0", 
+
+    "includeClientSideAssets": true, 
+
+    "skipFeatureDeployment": true, 
+
+    "isDomainIsolated": false, 
+
+    "developer": { 
+
+      "name": "", 
+
+      "websiteUrl": "", 
+
+      "privacyUrl": "", 
+
+      "termsOfUseUrl": "", 
+
+      "mpnId": "Undefined-1.16.1" 
+
+    }, 
+
+    "metadata": { 
+
+      "shortDescription": { 
+
+        "default": "cmd-set-customizer description" 
+
+      }, 
+
+      "longDescription": { 
+
+        "default": "cmd-set-customizer description" 
+
+      }, 
+
+      "screenshotPaths": [], 
+
+      "videoUrl": "", 
+
+      "categories": [] 
+
+    }, 
+
+    "features": [ 
+
+      { 
+
+        "title": "Application Extension - Deployment of custom action", 
+
+        "description": "Deploys a custom action with ClientSideComponentId association", 
+
+        "id": "68dae9f0-758d-484c-9b72-fc4184df725e", 
+
+        "version": "1.0.0.0", 
+
+        "assets": { 
+
+          "elementManifests": [ 
+
+            "elements.xml", 
+
+            "ClientSideInstance.xml" 
+
+          ] 
+
+        } 
+
+      } 
+
+    ] 
+
+  }, 
+
+  "paths": { 
+
+    "zippedPackage": "solution/cmd-set-customizer.sppkg" 
+
+  } 
+
+} 
+
+
+57. To package the client solution, that contains command set extensions.  
+
+gulp bundle –ship  
+
+ 
+
+58.To create the solution package solution, run the below command.  
+
+gulp package-solution –ship  
+
+=============================================================
+4. Form cutomizer
+
+Topic-Creating Form Customizer extension using SharePoint Framework
+
+
+60. Command to create project folder:  
+
+mkdir FormCustom  
+
+
+61. Navigate to directory using the below command:  
+
+cd FormCustom  
+
+62. To create the project, run the below command:
+
+yo @microsoft/sharepoint 
+
+manifest.json file code:
+
+{ 
+
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-extension-manifest.schema.json", 
+
+ 
+
+  "id": "848778db-7541-4942-a67e-d630e7b8e289", 
+
+  "alias": "CustomizeFormFormCustomizer", 
+
+  "componentType": "Extension", 
+
+  "extensionType": "FormCustomizer", 
+
+ 
+
+  // The "*" signifies that the version should be taken from the package.json 
+
+  "version": "*", 
+
+  "manifestVersion": 2, 
+
+ 
+
+  // If true, the component can only be installed on sites where Custom Script is allowed. 
+
+  // Components that allow authors to embed arbitrary script code should set this to true. 
+
+  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f 
+
+  "requiresCustomScript": false 
+
+} 
+
+=========================================================
+
+Topic- Understand the code of Form Customizer extension
+
+63. CustomizeFormFormCustomizer.ts file code:
+
+import { Log } from '@microsoft/sp-core-library'; 
+
+import { 
+
+  BaseFormCustomizer 
+
+} from '@microsoft/sp-listview-extensibility'; 
+
+
+serve.json file code:
+
+{ 
+
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json", 
+
+  "port": 4321, 
+
+  "https": true, 
+
+  "serveConfigurations": { 
+
+    "default": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/_layouts/15/SPListForm.aspx", 
+
+      "formCustomizer": { 
+
+        "componentId": "848778db-7541-4942-a67e-d630e7b8e289", 
+
+        "PageType": 8, 
+
+        "RootFolder": "/sites/TsInfoTechDeveloper/Lists/Product%20list", 
+
+        "properties": { 
+
+          "sampleText": "Value" 
+
+        } 
+
+      } 
+
+    }, 
+
+    "customizeForm_NewForm": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/_layouts/15/SPListForm.aspx", 
+
+      "formCustomizer": { 
+
+        "componentId": "848778db-7541-4942-a67e-d630e7b8e289", 
+
+        "PageType": 8, 
+
+        "RootFolder": "/sites/TsInfoTechDeveloper/Lists/Product%20list", 
+
+        "properties": { 
+
+          "sampleText": "Value" 
+
+        } 
+
+      } 
+
+    }, 
+
+    "customizeForm_EditForm": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/_layouts/15/SPListForm.aspx", 
+
+      "formCustomizer": { 
+
+        "componentId": "848778db-7541-4942-a67e-d630e7b8e289", 
+
+        "PageType": 6, 
+
+        "RootFolder": "/sites/TsInfoTechDeveloper/Lists/Product%20list", 
+
+        "ID": 1, 
+
+        "properties": { 
+
+          "sampleText": "Value" 
+
+        } 
+
+      } 
+
+    }, 
+
+    "customizeForm_ViewForm": { 
+
+      "pageUrl": "https://tsinfotechnologies.sharepoint.com/sites/TsInfoTechDeveloper/_layouts/15/SPListForm.aspx", 
+
+      "formCustomizer": { 
+
+        "componentId": "848778db-7541-4942-a67e-d630e7b8e289", 
+
+        "PageType": 4, 
+
+        "RootFolder": "/sites/TsInfoTechDeveloper/Lists/Product%20list", 
+
+        "ID": 1, 
+
+        "properties": { 
+
+          "sampleText": "Value" 
+
+        } 
+
+      } 
+
+    } 
+
+  } 
+
+} 
+
+
+==============================================
+
+Topic- Adding editing capabilities to the form item 
+
+64. mystring.d.ts file code
+
+declare interface ICustomizeFormFormCustomizerStrings { 
+
+  Save: string; 
+
+  Cancel: string; 
+
+  Close: string; 
+
+  Title: string; 
+
+} 
+
+ 
+
+declare module 'CustomizeFormFormCustomizerStrings' { 
+
+  const strings: ICustomizeFormFormCustomizerStrings; 
+
+  export = strings; 
+
+} 
+
+65: en-us.js file code:
+define([], function() { 
+
+  return { 
+
+    "Save": "Save", 
+
+    "Cancel": "Cancel", 
+
+    "Close": "Close", 
+
+    "Title": "Title" 
+
+  } 
+
+}); 
+
+66: CustomizeFormFormCustomizer.module.scss file:
+
+.customizeForm { 
+
+  background-color: "[theme:white, default:#ffffff]"; 
+
+  color: "[theme:themePrimary, default:#0078d4]"; 
+
+  padding: 0.5rem; 
+
+.error { 
+
+  color: red; 
+
+} 
+
+67: On .ts file code:
+import { FormDisplayMode } from '@microsoft/sp-core-library'; import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+
+onInit() method code:
+
+public onInit(): Promise<void> {  
+
+  if (this.displayMode === FormDisplayMode.New) {  
+
+    // we're creating a new item so nothing to load  
+
+    return Promise.resolve();  
+
+  }  
+
+  // load item to display on the form  
+
+  return this.context.spHttpClient  
+
+    .get(this.context.pageContext.web.absoluteUrl + `/_api/web/lists/getbytitle('${this.context.list.title}')/items(${this.context.itemId})`, SPHttpClient.configurations.v1, {  
+
+      headers: {  
+
+        accept: 'application/json;odata.metadata=none'  
+
+      }  
+
+    })  
+
+    .then(res => {  
+
+      if (res.ok) {  
+
+        // store etag in case we'll need to update the item  
+
+        this._etag = res.headers.get('ETag');  
+
+        return res.json();  
+
+      }  
+
+      else {  
+
+        return Promise.reject(res.statusText);  
+
+      }  
+
+    })  
+
+    .then(item => {  
+
+      this._item = item;  
+
+      return Promise.resolve();  
+
+    });  
+
+}
+
+68. render () code:
+public render(): void {  
+
+  // render view form  
+
+  if (this.displayMode === FormDisplayMode.Display) {  
+
+   
+
+    this.domElement.innerHTML =  
+
+                  `<div class="${styles.error}">  
+
+                    <label for="title">${strings.Title}</label>  
+
+                    <br />  
+
+                      ${this._item?.Title}  
+
+                    <br />  
+
+                    <br />  
+
+                    <input type="button" id="cancel" value="${strings.Close}" />  
+
+                  </div>`;  
+
+   
+
+    document.getElementById('cancel').addEventListener('click', this._onClose.bind(this));  
+
+  }  
+
+  // render new/edit form  
+
+  else {  
+
+    this.domElement.innerHTML =  
+
+                `<div class="${styles.error}">  
+
+                  <label for="title">${strings.Title}</label><br />  
+
+                  <input type="text" id="title" value="${this._item?.Title || ''}"/>  
+
+                  <br />  
+
+                  <br />  
+
+                  <input type="button" id="save" value="${strings.Save}" />  
+
+                  <input type="button" id="cancel" value="${strings.Cancel}" />  
+
+                  <br />  
+
+                  <br />  
+
+                  <div class="${styles.error}"></div>  
+
+                </div>`;  
+
+   
+
+    document.getElementById('save').addEventListener('click', this._onSave.bind(this));  
+
+    document.getElementById('cancel').addEventListener('click', this._onClose.bind(this));  
+
+  }  
+
+}  
+
+69. _onSave methods code:
+
+private _onSave = async (): Promise<void> => {  
+
+    // disable all input elements while we're saving the item  
+
+    this.domElement.querySelectorAll('input').forEach(el => el.setAttribute('disabled', 'disabled'));  
+
+    // reset previous error message if any  
+
+    this.domElement.querySelector(`.${styles.error}`).innerHTML = '';  
+
+    
+
+    let request: Promise<SPHttpClientResponse>;  
+
+    const title: string = (document.getElementById('title') as HTMLInputElement).value;  
+
+    
+
+    switch (this.displayMode) {  
+
+      case FormDisplayMode.New:  
+
+        request = this._createItem(title);  
+
+        break;  
+
+      case FormDisplayMode.Edit:  
+
+request = this._updateItem(title);  
+
+    }  
+
+    const res: SPHttpClientResponse = await request;  
+
+    if (res.ok) {  
+
+      // You MUST call this.formSaved() after you save the form.  
+
+      this.formSaved();  
+
+    }  
+
+    else {  
+
+      const error: { error: { message: string } } = await res.json();  
+
+    
+
+      this.domElement.querySelector(`.${styles.error}`).innerHTML = `An error has occurred while saving the item. Please try again. Error: ${error.error.message}`;  
+
+      this.domElement.querySelectorAll('input').forEach(el => el.removeAttribute('disabled'));  
+
+    }  
+
+  }  
+
+70. Add a new method to ‘CustomizeFormFormCustomizer’ class,I.e. createItem() code:
+
+private createItem(title: string): Promise<SPHttpClientResponse> {  
+
+    return this.context.spHttpClient  
+
+      .post(this.context.pageContext.web.absoluteUrl + `/_api/web/lists/getByTitle('${this.context.list.title}')/items`, SPHttpClient.configurations.v1, {  
+
+        headers: {  
+
+          'content-type': 'application/json;odata.metadata=none'  
+        },  
+
+        body: JSON.stringify({  
+
+          Title: title  
+        })  
+
+      });  
+71. update () in CustomizeFormFormCustomizer class code:
+
+private updateItem(title: string): Promise<SPHttpClientResponse> {  
+
+    return this.context.spHttpClient  
+
+      .post(this.context.pageContext.web.absoluteUrl + `/_api/web/lists/getByTitle('${this.context.list.title}')/items(${this.context.itemId})`, SPHttpClient.configurations.v1, {  
+
+        headers: {  
+
+          'content-type': 'application/json;odata.metadata=none',  
+
+          'if-match': this._etag,  
+
+          'x-http-method': 'MERGE'  
+
+        },  
+
+        body: JSON.stringify({  
+
+          Title: title  
+
+        })  
+
+      });  
+
+  }  
+
+72.To compile the code and run the below command 
+gulp serve  
+
+=====================================================
+Topic-Deploying the solution in SharePoint  
+
+73. First terminate the solution from running with the below command:  
+
+Ctrl+C  
+
+74. To get the basic structure ready for packaging, run the following command on your client-side solution that includes the extension:.  
+
+gulp bundle  
+
+ 
+
+75. Then write the below command to create the solution package:  
+
+gulp package-solution  
+
+
+ 
+
+
+
+
+
